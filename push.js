@@ -47,12 +47,23 @@
       await sync();
     } catch (err) { status('Could not enable notifications: ' + (err.message || String(err))); }
   };
-  // Reminder rows are generated from local returns and written under the signed-in user.
-  // Times are scheduled at 9 AM local time, converted to UTC for the backend.
-  const isoAtLocalNine = (date, offset) => {
+  // Schedule at 08:00 UK time Monday–Friday, 11:00 Saturday–Sunday.
+  // Europe/London automatically accounts for GMT and British Summer Time.
+  const isoAtUKReminderTime = (date, offset) => {
     const [y,m,d] = date.split('-').map(Number);
-    const local = new Date(y,m-1,d-offset,9,0,0);
-    return local.toISOString();
+    const day = new Date(Date.UTC(y,m-1,d-offset));
+    const weekday = day.getUTCDay();
+    const hour = (weekday === 0 || weekday === 6) ? 11 : 8;
+    // Determine London's offset on the reminder date, including DST changes.
+    // Noon UTC is safely away from the UK clock-change hour.
+    const noon = new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate(),12));
+    const zone = new Intl.DateTimeFormat('en-GB', {
+      timeZone:'Europe/London', timeZoneName:'shortOffset'
+    }).formatToParts(noon).find(part => part.type === 'timeZoneName')?.value || 'GMT';
+    const match = /^GMT([+-])(\d{1,2})(?::(\d{2}))?$/.exec(zone);
+    const offsetMinutes = match ? (match[1] === '+' ? 1 : -1) *
+      (Number(match[2])*60 + Number(match[3] || 0)) : 0;
+    return new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate(),hour) - offsetMinutes*60000).toISOString();
   };
   const rowsFor = (item, userId) => {
     if (item.done || item.reminders === 'none') return [];
@@ -65,7 +76,7 @@
     ]) {
       if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
       for (const days of offsets) {
-        const scheduled = isoAtLocalNine(date,days);
+        const scheduled = isoAtUKReminderTime(date,days);
         if (Date.parse(scheduled) <= now) continue;
         rows.push({user_id:userId,return_id:String(item.id),reminder_type:`${kind}-${days}`,
           title:kind === 'register' ? 'Register your return ♡' : 'Your parcel deadline ♡',

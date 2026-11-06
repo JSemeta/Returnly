@@ -107,3 +107,7 @@ Reminder times are calculated at 9 AM in the iPhone's current time zone when syn
 5. On your installed iPhone Returnly app, open the account dialog and sign in with that email and password.
 
 Do not put your password or Supabase service-role key in any website file.
+
+
+## UK reminder delivery times
+New reminders are generated for 08:00 Europe/London on weekdays and 11:00 Europe/London on weekends, including GMT/BST changes. Existing future reminders are replaced on the next Sync reminders action. This update does not configure the automatic Supabase cron invocation; that is a separate server-side step.
