@@ -96,3 +96,14 @@ Supabase tables must exist and have RLS policies allowing authenticated users to
 A future sender should handle HTTP 404/410 expired subscriptions, retry transient failures, avoid concurrent duplicate sends, and avoid re-sending when any device has already received a reminder. Until that is completed, do not turn on a cron schedule.
 
 Reminder times are calculated at 9 AM in the iPhone's current time zone when syncing. If you change time zones, tap Sync reminders. Your existing returns remain in localStorage. The server receives company names, deadlines, return IDs, and subscription data only for notification delivery.
+
+
+## Password sign-in (no magic-link email required)
+
+1. In Supabase dashboard, open Authentication > Users > Add user > Create new user.
+2. Enter your email and a strong password, and select Auto Confirm User if shown.
+3. Upload this package's files to your existing GitHub Pages repository, replacing matching files.
+4. Keep your existing `note.js` in the repository; this package intentionally omits it.
+5. On your installed iPhone Returnly app, open the account dialog and sign in with that email and password.
+
+Do not put your password or Supabase service-role key in any website file.

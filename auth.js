@@ -13,12 +13,13 @@
     if (error && error.name !== 'AuthSessionMissingError') console.warn('Auth status:', error.message);
     const signedIn = !!user;
     $('authEmailForm').classList.toggle('hidden', signedIn);
+    $('authPasswordForm').classList.toggle('hidden', signedIn);
     $('authCodeForm').classList.add('hidden');
     $('authLinkForm').classList.toggle('hidden', signedIn);
     $('authSignOut').classList.toggle('hidden', !signedIn);
     $('authBtn').textContent = signedIn ? '♥' : '♙';
     $('authBtn').title = signedIn ? 'Signed in' : 'Sign in';
-    status(signedIn ? `Signed in as ${user.email}. Notifications are not enabled yet.` : 'Sign in using your email.');
+    status(signedIn ? `Signed in as ${user.email}. You can now enable notifications.` : 'Sign in with your Supabase email and password, or use an email link.');
   };
   $('authBtn').onclick = () => dialog.showModal();
   $('authClose').onclick = () => dialog.close();
@@ -31,6 +32,17 @@
   });
   window.returnlySupabase = client;
   window.dispatchEvent(new Event('returnly-auth-ready'));
+  $('authPasswordForm').onsubmit = async event => {
+    event.preventDefault();
+    const email = $('authPasswordEmail').value.trim();
+    const password = $('authPassword').value;
+    status('Signing in…');
+    const { error } = await client.auth.signInWithPassword({ email, password });
+    $('authPassword').value = '';
+    if (error) { status(`Could not sign in: ${error.message}`); return; }
+    await render();
+    window.dispatchEvent(new Event('returnly-auth-changed'));
+  };
   $('authEmailForm').onsubmit = async event => {
     event.preventDefault();
     currentEmail = $('authEmail').value.trim();

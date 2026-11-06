@@ -116,6 +116,12 @@
       <div class="modal-head"><div><p class="eyebrow">YOUR PRIVATE ACCOUNT</p><h2>Sign in ♡</h2></div><button type="button" class="close-button" id="authClose">×</button></div>
       <p class="helper">Sign in once to prepare Returnly for private push notifications. Your existing returns stay on this device.</p>
       <p id="authStatus" class="helper" role="status" aria-live="polite"></p>
+      <form id="authPasswordForm">
+        <label>Email address<input id="authPasswordEmail" type="email" autocomplete="username" required placeholder="you@example.com"></label>
+        <label>Password<input id="authPassword" type="password" autocomplete="current-password" required placeholder="Your Supabase account password"></label>
+        <button class="primary-button full" type="submit">Sign in with password ♡</button>
+      </form>
+      <p class="helper">Or use an email sign-in link instead:</p>
       <form id="authEmailForm">
         <label>Your email address<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
         <button class="primary-button full" type="submit">Send sign-in email ♡</button>
@@ -132,9 +138,9 @@
     </div>
   </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-  <script src="auth.js?v=7" defer></script>
+  <script src="auth.js?v=8" defer></script>
   <script src="note.js?v=5" defer></script>
-  <script src="app.js?v=7" defer></script>
-  <script src="push.js?v=7" defer></script>
+  <script src="app.js?v=8" defer></script>
+  <script src="push.js?v=8" defer></script>
 </body>
 </html>
