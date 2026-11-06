@@ -1,0 +1,16 @@
+{
+  "name": "Returnly \u2014 Returns, remembered",
+  "short_name": "Returnly",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffaf8",
+  "theme_color": "#f8e7eb",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
