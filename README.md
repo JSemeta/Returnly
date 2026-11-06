@@ -58,3 +58,17 @@ You do not need to edit `index.html`, `app.js`, or `styles.css` to change the no
 
 ## Fix for old versions showing on iPhone
 This version updates `sw.js` to prefer fresh network files while online and uses cached copies only when offline. It also changes asset URLs to help Safari refresh the app. Upload all files in this folder to your existing GitHub repository and commit them. Do not clear Safari website data or delete the Home Screen app: your returns are stored locally. After GitHub Pages completes, open Returnly in Safari while online, wait a moment, close and reopen the Home Screen app. A second reopening may be necessary for the service worker to take control.
+
+
+## Email sign-in (version 5)
+This update adds a private email sign-in screen (person icon at the top). It does **not** yet send push notifications. Your returns and retailer settings remain in localStorage.
+
+Supabase project URL: `https://cbbiquszckqlfrbczagf.supabase.co` (the browser URL must not include `/rest/v1/`). The public publishable key is configured in `auth.js`; never commit private or service-role keys.
+
+In Supabase Authentication → URL Configuration, use your exact GitHub Pages URL as Site URL and an allowed redirect. In Authentication → Providers → Email, enable email sign-in.
+
+**iPhone note:** Email magic links sometimes open Safari rather than the Home Screen app, which can have separate sign-in storage. For the most reliable single-device login, enable an email OTP code template in Supabase Authentication → Email Templates → Magic Link. Make the email body include `{{ .Token }}` so you can copy the code into the Returnly Home Screen app. The sign-in form supports both links and codes. If the code is not present, the email template needs changing.
+
+After you have signed in, turn off public sign-ups in Supabase Authentication settings. Before connecting any notification endpoints, restrict access to your exact authenticated user ID in the server and database. The current database schema alone does not implement this protection.
+
+Push notifications require a separate secure sender, a push subscription endpoint, VAPID keys, and a scheduler. They are **not** active in this release.

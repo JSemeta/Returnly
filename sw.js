@@ -1,7 +1,7 @@
 // Returnly service worker: fetch fresh website files when online, cache for offline use.
 // Does not touch localStorage, saved returns, or retailer settings.
-const CACHE_NAME = 'returnly-v4-network-first';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './note.js', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'returnly-v5-network-first';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './auth.js', './note.js', './manifest.json', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

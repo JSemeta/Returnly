@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Returnly">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <title>Returnly — Returns, remembered</title>
 </head>
 <body>
@@ -19,6 +19,7 @@
         <div class="eyebrow">YOUR LITTLE RETURN ORGANISER</div>
         <h1>returnly<span>♡</span></h1>
       </div>
+      <button class="icon-button" id="authBtn" aria-label="Sign in to Returnly" title="Account">♙</button>
       <button class="icon-button" id="settingsBtn" aria-label="Retailer settings">⚙</button>
     </header>
 
@@ -103,7 +104,25 @@
     <div id="detailContent"></div>
   </dialog>
 
-  <script src="note.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <dialog id="authDialog">
+    <div class="auth-panel">
+      <div class="modal-head"><div><p class="eyebrow">YOUR PRIVATE ACCOUNT</p><h2>Sign in ♡</h2></div><button type="button" class="close-button" id="authClose">×</button></div>
+      <p class="helper">Sign in once to prepare Returnly for private push notifications. Your existing returns stay on this device.</p>
+      <p id="authStatus" class="helper" role="status" aria-live="polite"></p>
+      <form id="authEmailForm">
+        <label>Your email address<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <button class="primary-button full" type="submit">Send sign-in email ♡</button>
+      </form>
+      <form id="authCodeForm" class="hidden">
+        <label>Six-digit email code<input id="authCode" inputmode="numeric" pattern="[0-9]{6,8}" autocomplete="one-time-code" placeholder="123456" required></label>
+        <button class="primary-button full" type="submit">Verify code</button>
+      </form>
+      <button id="authSignOut" class="secondary-button hidden" type="button">Sign out</button>
+    </div>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="auth.js?v=5" defer></script>
+  <script src="note.js?v=5" defer></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
