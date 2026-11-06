@@ -117,12 +117,16 @@
         <label>Six-digit email code<input id="authCode" inputmode="numeric" pattern="[0-9]{6,8}" autocomplete="one-time-code" placeholder="123456" required></label>
         <button class="primary-button full" type="submit">Verify code</button>
       </form>
+      <form id="authLinkForm" class="hidden">
+        <label>Paste your sign-in link<input id="authLink" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://...supabase.co/auth/v1/verify?..." required></label>
+        <button class="primary-button full" type="submit">Complete sign-in ♡</button>
+      </form>
       <button id="authSignOut" class="secondary-button hidden" type="button">Sign out</button>
     </div>
   </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-  <script src="auth.js?v=5" defer></script>
-  <script src="note.js?v=6"></script>
-  <script src="app.js?v=5"></script>
+  <script src="auth.js?v=6" defer></script>
+  <script src="note.js?v=5" defer></script>
+  <script src="app.js?v=6" defer></script>
 </body>
 </html>

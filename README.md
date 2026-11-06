@@ -72,3 +72,15 @@ In Supabase Authentication → URL Configuration, use your exact GitHub Pages UR
 After you have signed in, turn off public sign-ups in Supabase Authentication settings. Before connecting any notification endpoints, restrict access to your exact authenticated user ID in the server and database. The current database schema alone does not implement this protection.
 
 Push notifications require a separate secure sender, a push subscription endpoint, VAPID keys, and a scheduler. They are **not** active in this release.
+
+
+## Sign in to the installed iPhone Home Screen app using a magic link
+1. Open Returnly from its Home Screen icon and tap Account.
+2. Enter the email address you want to use and request a sign-in email.
+3. In the email, **copy the original Supabase sign-in URL without opening it**. On iPhone, long-press the link and choose Copy Link.
+4. Return to the Home Screen app, paste it in **Paste your sign-in link**, and tap **Complete sign-in**.
+5. A magic link can be used only once. If you opened it in Safari already, request a new link.
+
+Keep your customised `note.js` file on GitHub: **do not upload the `note.js` from this ZIP**.
+
+Security: the pasted link is a temporary sign-in credential. Do not share it with anyone or paste it into public GitHub files. This update enables login only; push notifications are not yet implemented.
