@@ -24,9 +24,10 @@
 
     <section class="hello-card">
       <div class="hello-copy">
-        <p class="eyebrow">A LITTLE LESS TO REMEMBER</p>
-        <h2>Returns,<br><em>remembered.</em></h2>
-        <p>Keep every return deadline in one pretty place.</p>
+        <p class="eyebrow">A LITTLE NOTE TO YOURSELF</p>
+        <h2>Your own little<br><em>reminder.</em></h2>
+        <textarea id="personalMessage" rows="2" maxlength="180" placeholder="Write a personal message or reminder…"></textarea>
+        <div class="message-save-row"><button type="button" id="saveMessageBtn">Save note ♡</button><span id="messageSaved" aria-live="polite"></span></div>
       </div>
       <div class="flower" aria-hidden="true">✿</div>
     </section>
@@ -64,17 +65,15 @@
       <label>What are you returning? <small>(optional)</small>
         <input id="item" placeholder="e.g. Pink cardigan">
       </label>
-      <label>Return period starts from
-        <select id="dateBasis"><option value="delivery">Delivery date</option><option value="purchase">Purchase date</option></select>
+      <label>Dispatch / delivery date
+        <input id="dispatchDate" type="date" required>
       </label>
-      <label id="startDateLabel">Delivery date
-        <input id="startDate" type="date" required>
+      <div class="suggestion"><div><span class="eyebrow">REGISTER RETURN CODE BY</span><strong id="registerSuggestion">Choose a company and date</strong></div><span class="sparkle">✧</span></div>
+      <label>Register code by (you can edit this date)
+        <input id="registerBy" type="date" required>
       </label>
-      <div class="suggestion">
-        <div><span class="eyebrow">SUGGESTED DEADLINE</span><strong id="suggestedDate">Choose a company and date</strong></div>
-        <span class="sparkle">✧</span>
-      </div>
-      <label>Return by
+      <div class="suggestion"><div><span class="eyebrow">RETURN PARCEL BY</span><strong id="returnSuggestion">Choose a company and date</strong></div><span class="sparkle">♡</span></div>
+      <label>Return parcel by (you can edit this date)
         <input id="dueDate" type="date" required>
       </label>
       <label>Remind me
@@ -86,7 +85,7 @@
           <option value="none">No reminders</option>
         </select>
       </label>
-      <p class="helper" id="policyHint">Choose a saved retailer to see its usual return period. Always check the retailer's own policy.</p>
+      <p class="helper" id="policyHint">Choose a saved company to calculate both deadlines. Company timings can be edited in the settings menu; always check the retailer’s current policy.</p>
       <button class="primary-button full" type="submit">Save my return ♡</button>
     </form>
   </dialog>
@@ -94,8 +93,8 @@
   <dialog id="retailerDialog">
     <form id="retailerForm" method="dialog">
       <div class="modal-head"><div><p class="eyebrow">YOUR SAVED COMPANIES</p><h2>Retailer settings</h2></div><button type="button" class="close-button" data-close="retailerDialog">×</button></div>
-      <p class="helper">Set a usual return period for each company. These are editable suggestions, not guarantees.</p>
-      <div id="retailerSettings" class="retailer-settings"></div>
+      <p class="helper">Set how many days after dispatch / delivery you have to register the return code, and how many days you have to send the parcel back. These are editable settings, not verified guarantees.</p>
+      <div class="retailer-settings-head"><span>Company</span><span>Register</span><span>Return</span><span></span></div><div id="retailerSettings" class="retailer-settings"></div>
       <div class="add-retailer-row"><input id="newRetailer" placeholder="Add a company"><button type="button" class="secondary-button" id="addRetailerBtn">Add</button></div>
       <button class="primary-button full" type="submit">Save retailer settings</button>
     </form>

@@ -1,77 +1,57 @@
 const $ = id => document.getElementById(id);
-const today = () => new Date().toISOString().slice(0,10);
+const today = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const addDays = (date, days) => { const d = new Date(date+'T12:00:00'); d.setDate(d.getDate()+Number(days)); return d.toISOString().slice(0,10); };
 const pretty = date => date ? new Date(date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'Not set';
 const daysLeft = date => Math.ceil((new Date(date+'T12:00:00')-new Date(today()+'T12:00:00'))/86400000);
-const defaultRetailers = {'Zara':30,'ASOS':28,'PrettyLittleThing':28,'Pretty Little Thing':28,'H&M':30,'Next':28,'Boohoo':28,'Mango':30,'John Lewis':35,'Amazon':30,'River Island':28,'New Look':28,'Nike':30,'Shein':30};
-let retailers = JSON.parse(localStorage.getItem('returnly-retailers')||'null') || defaultRetailers;
-let returns = JSON.parse(localStorage.getItem('returnly-returns')||'[]');
-let completedView = false, selectedId = null;
-const save = () => {localStorage.setItem('returnly-retailers',JSON.stringify(retailers));localStorage.setItem('returnly-returns',JSON.stringify(returns));};
-const normalise = s => s.trim().toLowerCase();
-function retailerMatch(name){const key=Object.keys(retailers).find(k=>normalise(k)===normalise(name));return key||null;}
+const starterRetailers = {'Zara':[14,30],'ASOS':[14,28],'PrettyLittleThing':[14,28],'Pretty Little Thing':[14,28],'H&M':[14,30],'Next':[14,28],'Boohoo':[14,28],'Mango':[14,30],'John Lewis':[14,35],'Amazon':[14,30],'River Island':[14,28],'New Look':[14,28],'Nike':[14,30],'Shein':[14,30]};
+const storedRetailers=JSON.parse(localStorage.getItem('returnly-retailers')||'null');
+let retailers=storedRetailers?Object.fromEntries(Object.entries(storedRetailers).map(([n,v])=>[n,typeof v==='number'?{registrationDays:14,returnDays:v}:{registrationDays:Number(v.registrationDays??14),returnDays:Number(v.returnDays??v.days??30)}])):Object.fromEntries(Object.entries(starterRetailers).map(([n,v])=>[n,{registrationDays:v[0],returnDays:v[1]}]));
+let returns=JSON.parse(localStorage.getItem('returnly-returns')||'[]').map(x=>{
+ const config=retailers[x.company]||{registrationDays:14,returnDays:30};
+ return {...x,dispatchDate:x.dispatchDate||x.start||today(),registerBy:x.registerBy||addDays(x.dispatchDate||x.start||today(),config.registrationDays),due:x.due||addDays(x.dispatchDate||x.start||today(),config.returnDays)};
+});
+let completedView=false,selectedId=null;
+const save=()=>{localStorage.setItem('returnly-retailers',JSON.stringify(retailers));localStorage.setItem('returnly-returns',JSON.stringify(returns));};
+const normalise=s=>s.trim().toLowerCase();
+function retailerMatch(name){return Object.keys(retailers).find(k=>normalise(k)===normalise(name))||null;}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function render(){
  const active=returns.filter(x=>!x.done),done=returns.filter(x=>x.done);
- $('activeCount').textContent=active.length;
- $('soonCount').textContent=active.filter(x=>daysLeft(x.due)>=0&&daysLeft(x.due)<=3).length;
- $('doneCount').textContent=done.length;
+ $('activeCount').textContent=active.length;$('soonCount').textContent=active.filter(x=>daysLeft(x.due)>=0&&daysLeft(x.due)<=3).length;$('doneCount').textContent=done.length;
  const list=(completedView?done:active).slice().sort((a,b)=>a.due.localeCompare(b.due));
- $('returnsList').innerHTML=list.map(x=>{
-  const left=daysLeft(x.due),status=left<0?`${Math.abs(left)} days overdue`:left===0?'Due today':`${left} days left`;
-  const cls=left<=3?'urgent':left>7?'safe':'';
-  return `<article class="return-card" data-id="${x.id}"><div class="company-mark">${escapeHtml(x.company.trim().charAt(0).toUpperCase())}</div><div class="return-info"><strong>${escapeHtml(x.company)}</strong><small>${escapeHtml(x.item||'Return parcel')}</small></div><div class="due ${cls}"><strong>${pretty(x.due)}</strong><span>${completedView?'Completed':status}</span></div></article>`;
- }).join('');
- $('emptyState').classList.toggle('hidden',list.length>0);
- $('returnsList').classList.toggle('hidden',list.length===0);
- $('emptyState').querySelector('h3').textContent=completedView?'No completed returns yet':'Nothing to return just yet';
- $('emptyState').querySelector('p').textContent=completedView?'Returns you mark as completed will appear here.':'Add your first parcel and we’ll help you keep an eye on the deadline.';
- $('emptyAdd').classList.toggle('hidden',completedView);
- $('showCompleted').textContent=completedView?'Upcoming returns':'Completed';
- $('addBtn').classList.toggle('hidden',completedView);
+ $('returnsList').innerHTML=list.map(x=>{const left=daysLeft(x.due),status=left<0?`${Math.abs(left)} days overdue`:left===0?'Due today':`${left} days left`;const cls=left<=3?'urgent':left>7?'safe':'';return `<article class="return-card" data-id="${x.id}"><div class="company-mark">${escapeHtml(x.company.trim().charAt(0).toUpperCase())}</div><div class="return-info"><strong>${escapeHtml(x.company)}</strong><small>${escapeHtml(x.item||'Return parcel')} · Register by ${pretty(x.registerBy)}</small></div><div class="due ${cls}"><strong>${pretty(x.due)}</strong><span>${completedView?'Completed':status}</span></div></article>`;}).join('');
+ $('emptyState').classList.toggle('hidden',list.length>0);$('returnsList').classList.toggle('hidden',list.length===0);$('emptyState').querySelector('h3').textContent=completedView?'No completed returns yet':'Nothing to return just yet';$('emptyState').querySelector('p').textContent=completedView?'Returns you mark as completed will appear here.':'Add your first parcel and we’ll help you keep an eye on the deadlines.';$('emptyAdd').classList.toggle('hidden',completedView);$('showCompleted').textContent=completedView?'Upcoming returns':'Completed';$('addBtn').classList.toggle('hidden',completedView);
  $('returnsList').querySelectorAll('.return-card').forEach(el=>el.addEventListener('click',()=>showDetail(el.dataset.id)));
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function updateSuggestions(){
- const name=$('company').value, key=retailerMatch(name), start=$('startDate').value;
- $('startDateLabel').firstChild.textContent=$('dateBasis').value==='delivery'?'Delivery date':'Purchase date';
- if(key&&start){const d=addDays(start,retailers[key]);$('suggestedDate').textContent=pretty(d);$('dueDate').value=d;$('policyHint').textContent=`Using your saved ${retailers[key]}-day suggestion for ${key}. Check the retailer's policy before relying on it.`;}
- else if(start){$('suggestedDate').textContent='Add a saved retailer to calculate';$('policyHint').textContent='No saved return period for this company yet. You can still choose the deadline yourself.';}
- else {$('suggestedDate').textContent='Choose a company and date';}
+ const name=$('company').value,key=retailerMatch(name),dispatch=$('dispatchDate').value;
+ if(key&&dispatch){const cfg=retailers[key],reg=addDays(dispatch,cfg.registrationDays),due=addDays(dispatch,cfg.returnDays);$('registerSuggestion').textContent=pretty(reg);$('returnSuggestion').textContent=pretty(due);$('registerBy').value=reg;$('dueDate').value=due;$('policyHint').textContent=`Using your saved timings for ${key}: register after ${cfg.registrationDays} days and return after ${cfg.returnDays} days. These are your editable settings — check the retailer's current policy.`;}
+ else if(dispatch){$('registerSuggestion').textContent='Add or choose a saved company';$('returnSuggestion').textContent='Add or choose a saved company';$('policyHint').textContent='No saved timings for this company yet. You can add it in Company settings, or enter both dates manually.';}
+ else{$('registerSuggestion').textContent='Choose a company and date';$('returnSuggestion').textContent='Choose a company and date';}
 }
-function openAdd(){ $('returnForm').reset();$('startDate').value=today();$('dueDate').value='';$('suggestedDate').textContent='Choose a company and date';$('policyHint').textContent='Choose a saved retailer to see its usual return period. Always check the retailer’s own policy.';$('returnDialog').showModal(); }
-$('addBtn').onclick=openAdd;$('emptyAdd').onclick=openAdd;
-$('showCompleted').onclick=()=>{completedView=!completedView;render();};
+function openAdd(){$('returnForm').reset();$('dispatchDate').value=today();$('registerBy').value='';$('dueDate').value='';updateSuggestions();$('returnDialog').showModal();}
+$('addBtn').onclick=openAdd;$('emptyAdd').onclick=openAdd;$('showCompleted').onclick=()=>{completedView=!completedView;render();};
 $('settingsBtn').onclick=()=>{renderRetailers();$('retailerDialog').showModal();};
+$('personalMessage').value=localStorage.getItem('returnly-personal-message')||'';
+$('saveMessageBtn').onclick=()=>{localStorage.setItem('returnly-personal-message',$('personalMessage').value.trim());$('messageSaved').textContent='Saved ♡';setTimeout(()=>{$('messageSaved').textContent='';},1800);};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
-$('company').addEventListener('input',updateSuggestions);$('startDate').addEventListener('change',updateSuggestions);$('dateBasis').addEventListener('change',updateSuggestions);
-$('returnForm').addEventListener('submit',e=>{
- e.preventDefault();
- const company=$('company').value.trim(),start=$('startDate').value,due=$('dueDate').value;
- if(!company||!start||!due){alert('Please add a company and both dates.');return;}
- const known=retailerMatch(company);
- if(!known){retailers[company]=Math.max(0,daysLeft(due)-daysLeft(start));}
- returns.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),company:known||company,item:$('item').value.trim(),start,basis:$('dateBasis').value,due,reminders:$('reminders').value,done:false,created:today()});
- save();$('returnDialog').close();render();
-});
+$('company').addEventListener('input',updateSuggestions);$('dispatchDate').addEventListener('change',updateSuggestions);
+$('returnForm').addEventListener('submit',e=>{e.preventDefault();const company=$('company').value.trim(),dispatchDate=$('dispatchDate').value,registerBy=$('registerBy').value,due=$('dueDate').value;if(!company||!dispatchDate||!registerBy||!due){alert('Please add a company, dispatch date and both deadlines.');return;}let known=retailerMatch(company);if(!known){retailers[company]={registrationDays:Math.max(0,daysLeft(registerBy)-daysLeft(dispatchDate)),returnDays:Math.max(1,daysLeft(due)-daysLeft(dispatchDate))};known=company;}returns.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),company:known,item:$('item').value.trim(),dispatchDate,registerBy,due,reminders:$('reminders').value,done:false,created:today()});save();$('returnDialog').close();render();});
 function renderRetailers(){
- $('retailerSettings').innerHTML=Object.entries(retailers).sort((a,b)=>a[0].localeCompare(b[0])).map(([name,days])=>`<div class="retailer-row"><span>${escapeHtml(name)}</span><input aria-label="${escapeHtml(name)} return days" type="number" min="1" max="365" value="${days}" data-retailer="${escapeHtml(name)}"><button type="button" aria-label="Remove ${escapeHtml(name)}" data-remove="${escapeHtml(name)}">×</button></div>`).join('');
+ $('retailerSettings').innerHTML=Object.entries(retailers).sort((a,b)=>a[0].localeCompare(b[0])).map(([name,cfg])=>`<div class="retailer-row"><strong>${escapeHtml(name)}</strong><label>Register (days)<input aria-label="${escapeHtml(name)} registration days" type="number" min="0" max="365" value="${cfg.registrationDays}" data-registration="${escapeHtml(name)}"></label><label>Return (days)<input aria-label="${escapeHtml(name)} return days" type="number" min="1" max="365" value="${cfg.returnDays}" data-return="${escapeHtml(name)}"></label><button type="button" aria-label="Remove ${escapeHtml(name)}" data-remove="${escapeHtml(name)}">×</button></div>`).join('');
  $('retailerSettings').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{delete retailers[b.dataset.remove];renderRetailers();});
 }
-$('addRetailerBtn').onclick=()=>{const n=$('newRetailer').value.trim();if(!n)return;if(!retailerMatch(n))retailers[n]=30;$('newRetailer').value='';renderRetailers();};
-$('retailerForm').addEventListener('submit',e=>{e.preventDefault();$('retailerSettings').querySelectorAll('[data-retailer]').forEach(i=>{const n=i.dataset.retailer;retailers[n]=Math.max(1,Math.min(365,Number(i.value)||30));});save();$('retailerDialog').close();render();});
-function showDetail(id){
- selectedId=id;const x=returns.find(r=>r.id===id);if(!x)return;
- $('detailContent').innerHTML=`<div class="detail-top"><div><p class="eyebrow">RETURN DETAILS</p><h2>${escapeHtml(x.company)}</h2></div><button class="close-button" id="detailClose">×</button></div><p class="detail-date">${pretty(x.due)}</p><p class="helper">${escapeHtml(x.item||'Return parcel')} · ${daysLeft(x.due)<0?`${Math.abs(daysLeft(x.due))} days overdue`:daysLeft(x.due)===0?'Due today':`${daysLeft(x.due)} days remaining`}</p><p class="helper">Started from ${x.basis==='delivery'?'delivery':'purchase'} date: ${pretty(x.start)}<br>Reminder preference: ${x.reminders==='none'?'None':x.reminders==='0'?'On due date':x.reminders.split(',').join(', ')+' days before'}</p><div class="detail-actions"><button class="secondary-action" id="calendarBtn">Add calendar reminder</button><button class="secondary-action" id="editBtn">Edit deadline</button><button class="primary-button" id="completeBtn">${x.done?'Mark as active':'Mark returned ✓'}</button><button class="danger-action" id="deleteBtn">Delete return</button></div>`;
- $('detailDialog').showModal();$('detailClose').onclick=()=>$('detailDialog').close();
- $('completeBtn').onclick=()=>{x.done=!x.done;save();$('detailDialog').close();render();};
- $('deleteBtn').onclick=()=>{if(confirm('Delete this return?')){returns=returns.filter(r=>r.id!==id);save();$('detailDialog').close();render();}};
- $('editBtn').onclick=()=>{const d=prompt('New return deadline (YYYY-MM-DD)',x.due);if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)){x.due=d;save();$('detailDialog').close();render();}};
- $('calendarBtn').onclick=()=>downloadCalendar(x);
+$('addRetailerBtn').onclick=()=>{const n=$('newRetailer').value.trim();if(!n){return;}if(!retailerMatch(n))retailers[n]={registrationDays:14,returnDays:30};$('newRetailer').value='';renderRetailers();};
+$('retailerForm').addEventListener('submit',e=>{e.preventDefault();$('retailerSettings').querySelectorAll('[data-registration]').forEach(i=>{retailers[i.dataset.registration].registrationDays=Math.max(0,Math.min(365,Number(i.value)||0));});$('retailerSettings').querySelectorAll('[data-return]').forEach(i=>{retailers[i.dataset.return].returnDays=Math.max(1,Math.min(365,Number(i.value)||30));});save();$('retailerDialog').close();render();});
+function showDetail(id){selectedId=id;const x=returns.find(r=>r.id===id);if(!x)return;const regLeft=daysLeft(x.registerBy),dueLeft=daysLeft(x.due);$('detailContent').innerHTML=`<div class="detail-top"><div><p class="eyebrow">RETURN DETAILS</p><h2>${escapeHtml(x.company)}</h2></div><button class="close-button" id="detailClose">×</button></div><p class="detail-date">Register code by ${pretty(x.registerBy)}</p><p class="helper">${regLeft<0?`${Math.abs(regLeft)} days overdue`:regLeft===0?'Register today':`${regLeft} days to register`}</p><p class="detail-date">Return parcel by ${pretty(x.due)}</p><p class="helper">${dueLeft<0?`${Math.abs(dueLeft)} days overdue`:dueLeft===0?'Due today':`${dueLeft} days remaining`}</p><p class="helper">${escapeHtml(x.item||'Return parcel')}<br>Dispatch / delivery date: ${pretty(x.dispatchDate)}<br>Reminder preference: ${x.reminders==='none'?'None':x.reminders==='0'?'On each deadline':x.reminders.split(',').join(', ')+' days before each deadline'}</p><div class="detail-actions"><button class="secondary-action" id="calendarBtn">Add both calendar reminders</button><button class="secondary-action" id="editBtn">Edit deadlines</button><button class="primary-button" id="completeBtn">${x.done?'Mark as active':'Mark returned ✓'}</button><button class="danger-action" id="deleteBtn">Delete return</button></div>`;$('detailDialog').showModal();$('detailClose').onclick=()=>$('detailDialog').close();
+ $('completeBtn').onclick=()=>{x.done=!x.done;save();$('detailDialog').close();render();};$('deleteBtn').onclick=()=>{if(confirm('Delete this return?')){returns=returns.filter(r=>r.id!==id);save();$('detailDialog').close();render();}};
+ $('editBtn').onclick=()=>{const r=prompt('New return-code registration deadline (YYYY-MM-DD)',x.registerBy);if(r&&/^\d{4}-\d{2}-\d{2}$/.test(r)){const d=prompt('New return parcel deadline (YYYY-MM-DD)',x.due);if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)){x.registerBy=r;x.due=d;save();$('detailDialog').close();render();}}};$('calendarBtn').onclick=()=>downloadCalendar(x);
 }
 function downloadCalendar(x){
- const dt=x.due.replaceAll('-','');const title=`Return ${x.company}${x.item?' - '+x.item:''}`;
- const ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Returnly//Returns//EN\r\nBEGIN:VEVENT\r\nUID:${x.id}@returnly\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}\r\nDTSTART;VALUE=DATE:${dt}\r\nSUMMARY:${title.replace(/[,;]/g,' ')}\r\nDESCRIPTION:Return deadline. ${x.reminders==='none'?'':`Reminder preference in Returnly: ${x.reminders} days before.`}\r\nBEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:Return due tomorrow\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR`;
- const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='returnly-reminder.ics';a.click();URL.revokeObjectURL(url);
+ const alarms=x.reminders==='none'?[]:x.reminders==='0'?[0]:x.reminders.split(',').map(Number).filter(Number.isFinite);
+ const makeEvent=(date,label,suffix)=>{const dt=date.replaceAll('-','');const alarmText=label==='Register return code'?'Register your return code':'Return parcel deadline';const alarm=alarms.map(n=>`BEGIN:VALARM\r\nTRIGGER:${n===0?'PT0M':`-P${n}D`}\r\nACTION:DISPLAY\r\nDESCRIPTION:${alarmText}\r\nEND:VALARM\r\n`).join('');return `BEGIN:VEVENT\r\nUID:${x.id}-${suffix}@returnly\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}\r\nDTSTART;VALUE=DATE:${dt}\r\nSUMMARY:${label} - ${x.company.replace(/[,;]/g,' ')}\r\nDESCRIPTION:${label} for ${x.company.replace(/[,;]/g,' ')}.\r\n${alarm}END:VEVENT\r\n`;};
+ const ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Returnly//Returns//EN\r\n${makeEvent(x.registerBy,'Register return code','register')}${makeEvent(x.due,'Return parcel by','return')}END:VCALENDAR`;
+ const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='returnly-reminders.ics';a.click();URL.revokeObjectURL(url);
 }
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-$('startDate').value=today();render();
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+$('dispatchDate').value=today();render();

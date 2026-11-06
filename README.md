@@ -1,32 +1,45 @@
-# Returnly — free iPhone returns organiser
+# Returnly — free iPhone returns organiser (updated edition)
 
-A small installable web app (PWA) for keeping return deadlines in one place.
+This is an updated copy of the original Returnly app. Keep your original ZIP as a backup; upload these files over the existing files in your GitHub repository to update the live app.
 
-## Included
-- Add, edit and delete returns
-- Saved retailer return-period suggestions
-- Editable retailer list and return periods
-- Upcoming, urgent, overdue and completed views
-- Per-return reminder preferences saved with the return
-- Export a calendar event (`.ics`) with a one-day-before alert
-- Offline app shell after first successful load
-- Soft pink responsive design
+## What's new
+- Personal note on the home screen. Type a message and tap **Save note**; it stays on that device.
+- Add each return using the dispatch / delivery date as the starting point.
+- Two independent deadlines are calculated from that date: **register return code by** and **return parcel by**.
+- Each saved company has two editable timers in **Company settings**: registration days and return days.
+- Both dates can also be edited for an individual return.
+- Export two Apple Calendar events (one for code registration and one for the parcel deadline). The selected reminder offsets are applied to both events.
+- Existing saved returns are migrated in the browser: their current return deadline is preserved, and a registration date is added using the default registration timer.
 
-## Important reminder limitation
-This free first version does **not** send scheduled push notifications by itself. iOS web apps need a push service/server for reliable scheduled push alerts. The app saves your reminder preference and lets you add a calendar reminder to Apple Calendar, which can then alert you. The calendar export currently adds an alert one day before the deadline; edit the event in Calendar if you want a different alert.
+## Important policy and notification notes
+The starter company timers are examples, not live-verified retailer policies. Check each retailer's current terms, including whether the window begins at delivery, purchase, or another event, then adjust the two timers in Company settings. The app uses the date you enter as its common starting point for both timers.
 
-Retailer periods are editable examples only. Always verify the retailer's policy and whether the period starts from purchase or delivery.
+This PWA still does not send independent scheduled push notifications. The calendar export is the no-cost, simplest reminder route: add the two events to Apple Calendar and let iOS notify you. The reminder preference is used for both events in the exported calendar file.
 
-## Put it online for free with GitHub Pages
+For real web push notifications, see the section below. It requires a push subscription and a small server/backend to schedule and send notifications; GitHub Pages alone cannot send them.
+
+## Push notifications: what would be needed
+1. Keep the app hosted over HTTPS and install it to the iPhone Home Screen (iOS 16.4 or later supports web push for installed web apps).
+2. Add a **Turn on notifications** button. It must be tapped by the user, request permission, create a Push API subscription, and send that subscription to a backend.
+3. Add a backend/database to store each user's push subscription and the two scheduled deadlines per return.
+4. Use a server-side Web Push library with VAPID keys to send notifications at the selected reminder offsets. A scheduled job/queue checks due reminders and sends them; the service worker displays them.
+5. Handle permission changes, expired subscriptions, duplicate sends, time zones, and deleting/completing a return.
+
+A free-tier backend such as Supabase plus a scheduled function, or Cloudflare Workers with a storage/cron setup, can be used for a small personal project, but free-tier limits and setup change. Do not put VAPID private keys or database service-role keys in the public GitHub repository or browser JavaScript. Push notifications are not implemented in this ZIP yet.
+
+## Update your existing GitHub Pages app without losing the original
+1. Keep your old `Returnly-Free-iPhone-App.zip` somewhere safe as a backup.
+2. Unzip this updated ZIP on your computer.
+3. Open your existing public `returnly` repository on GitHub.
+4. Choose **Add file → Upload files**.
+5. Open the unzipped `returnly` folder and select all seven files inside it (not the folder itself). Drag them into GitHub's upload area. GitHub will show that files with the same names are being replaced.
+6. Commit the changes to the `main` branch.
+7. Wait for GitHub Pages to redeploy, then refresh the Returnly website on your iPhone. If it still shows the old version, close the installed app and reopen it; the service worker cache may take a refresh to update.
+
+Your return data and saved note stay in browser storage on your device. Replacing the website files does not normally delete that data. As a precaution, export/add any important reminders to Calendar before updating. GitHub Pages hosts the app files; it does not store your personal return records.
+
+## First install (if needed)
 1. Create/sign in to a free GitHub account.
-2. Create a new **public** repository named `returnly`.
-3. Upload all files in this folder to the repository root (not the folder itself).
-4. Open repository **Settings → Pages**.
-5. Under Build and deployment, choose **Deploy from a branch**, select `main` and `/ (root)`, then Save.
-6. Wait for the published URL shown in Pages.
-7. Open that URL in Safari on your iPhone. Tap Share → Add to Home Screen → Add.
-
-GitHub Pages is free for public repositories. Do not put private information in this public repository. Return data stays in the browser's local storage on your device; it is not uploaded to GitHub.
-
-## Local preview
-Open `index.html` in a browser. Installable PWA features require the app to be served over HTTPS or localhost.
+2. Create a public repository named `returnly` and upload all seven files to its root.
+3. Open **Settings → Pages**. Under Build and deployment, choose **Deploy from a branch**, branch `main`, folder `/(root)`, then Save.
+4. Open the published URL in Safari on your iPhone, tap Share → Add to Home Screen → Add.
