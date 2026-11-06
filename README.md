@@ -84,3 +84,15 @@ Push notifications require a separate secure sender, a push subscription endpoin
 Keep your customised `note.js` file on GitHub: **do not upload the `note.js` from this ZIP**.
 
 Security: the pasted link is a temporary sign-in credential. Do not share it with anyone or paste it into public GitHub files. This update enables login only; push notifications are not yet implemented.
+
+
+## Push notifications: version 7 (not fully live until scheduled sender is configured)
+This update adds the **Notifications** panel, service-worker push handling, subscription registration and reminder syncing. It **does not** create or activate the scheduled Supabase job. Keep your customised `note.js` on GitHub: this ZIP deliberately does not contain it.
+
+Upload the included files to GitHub, but do not delete your existing `note.js`. The app requires a signed-in Supabase account, a supported iPhone Home Screen installation, and permission to show notifications. The public VAPID key is in `push.js`; the private key stays in Supabase.
+
+Supabase tables must exist and have RLS policies allowing authenticated users to insert/select/delete their own rows. For the single-user setup, also restrict policies and the server-side sender to the intended authenticated UID before activating automatic sending. The current sender needs a scheduler and stronger duplicate-delivery protection before production use.
+
+A future sender should handle HTTP 404/410 expired subscriptions, retry transient failures, avoid concurrent duplicate sends, and avoid re-sending when any device has already received a reminder. Until that is completed, do not turn on a cron schedule.
+
+Reminder times are calculated at 9 AM in the iPhone's current time zone when syncing. If you change time zones, tap Sync reminders. Your existing returns remain in localStorage. The server receives company names, deadlines, return IDs, and subscription data only for notification delivery.

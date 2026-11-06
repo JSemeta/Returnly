@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Returnly">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=7">
   <title>Returnly — Returns, remembered</title>
 </head>
 <body>
@@ -30,6 +30,13 @@
         <p id="personalMessage" class="personal-note"></p>
       </div>
       <div class="flower" aria-hidden="true">✿</div>
+    </section>
+
+    <section class="push-panel" aria-labelledby="pushTitle">
+      <div class="push-heading"><div><p class="eyebrow">GENTLE NUDGES</p><h2 id="pushTitle">Notifications ♡</h2></div><span aria-hidden="true">🔔</span></div>
+      <p class="helper" id="pushStatus" role="status" aria-live="polite">Sign in to enable reminders on this iPhone.</p>
+      <div class="push-actions"><button class="primary-button" id="pushEnable" type="button">Enable notifications</button><button class="secondary-button" id="pushSync" type="button">Sync reminders</button></div>
+      <p class="helper">Uses your return's reminder preference for both registration and parcel deadlines. Notifications require sign-in and permission on your Home Screen app.</p>
     </section>
 
     <section class="stats">
@@ -125,8 +132,9 @@
     </div>
   </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-  <script src="auth.js?v=6" defer></script>
+  <script src="auth.js?v=7" defer></script>
   <script src="note.js?v=5" defer></script>
-  <script src="app.js?v=6" defer></script>
+  <script src="app.js?v=7" defer></script>
+  <script src="push.js?v=7" defer></script>
 </body>
 </html>

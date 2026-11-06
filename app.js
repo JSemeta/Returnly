@@ -11,7 +11,7 @@ let returns=JSON.parse(localStorage.getItem('returnly-returns')||'[]').map(x=>{
  return {...x,dispatchDate:x.dispatchDate||x.start||today(),registerBy:x.registerBy||addDays(x.dispatchDate||x.start||today(),config.registrationDays),due:x.due||addDays(x.dispatchDate||x.start||today(),config.returnDays)};
 });
 let completedView=false,selectedId=null;
-const save=()=>{localStorage.setItem('returnly-retailers',JSON.stringify(retailers));localStorage.setItem('returnly-returns',JSON.stringify(returns));};
+const save=()=>{localStorage.setItem('returnly-retailers',JSON.stringify(retailers));localStorage.setItem('returnly-returns',JSON.stringify(returns));window.dispatchEvent(new Event('returnly-returns-changed'));};
 const normalise=s=>s.trim().toLowerCase();
 function retailerMatch(name){return Object.keys(retailers).find(k=>normalise(k)===normalise(name))||null;}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

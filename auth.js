@@ -29,6 +29,8 @@
   client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
+  window.returnlySupabase = client;
+  window.dispatchEvent(new Event('returnly-auth-ready'));
   $('authEmailForm').onsubmit = async event => {
     event.preventDefault();
     currentEmail = $('authEmail').value.trim();
@@ -79,6 +81,6 @@
     if (error) { status(error.message); return; }
     await render();
   };
-  client.auth.onAuthStateChange(() => { setTimeout(() => render().catch(console.error), 0); });
+  client.auth.onAuthStateChange(() => { setTimeout(() => { render().catch(console.error); window.dispatchEvent(new Event('returnly-auth-changed')); }, 0); });
   render().catch(error => status(`Sign-in setup error: ${error.message}`));
 })();
