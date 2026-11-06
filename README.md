@@ -55,3 +55,6 @@ Your return data and saved note stay in browser storage on your device. Replacin
 6. Wait a few minutes for GitHub Pages to publish, then refresh Returnly.
 
 You do not need to edit `index.html`, `app.js`, or `styles.css` to change the note. The note is shared website text, not private per-device information. Anyone visiting the site sees the same note.
+
+## Fix for old versions showing on iPhone
+This version updates `sw.js` to prefer fresh network files while online and uses cached copies only when offline. It also changes asset URLs to help Safari refresh the app. Upload all files in this folder to your existing GitHub repository and commit them. Do not clear Safari website data or delete the Home Screen app: your returns are stored locally. After GitHub Pages completes, open Returnly in Safari while online, wait a moment, close and reopen the Home Screen app. A second reopening may be necessary for the service worker to take control.
