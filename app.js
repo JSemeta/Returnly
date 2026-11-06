@@ -32,8 +32,7 @@ function updateSuggestions(){
 function openAdd(){$('returnForm').reset();$('dispatchDate').value=today();$('registerBy').value='';$('dueDate').value='';updateSuggestions();$('returnDialog').showModal();}
 $('addBtn').onclick=openAdd;$('emptyAdd').onclick=openAdd;$('showCompleted').onclick=()=>{completedView=!completedView;render();};
 $('settingsBtn').onclick=()=>{renderRetailers();$('retailerDialog').showModal();};
-$('personalMessage').value=localStorage.getItem('returnly-personal-message')||'';
-$('saveMessageBtn').onclick=()=>{localStorage.setItem('returnly-personal-message',$('personalMessage').value.trim());$('messageSaved').textContent='Saved ♡';setTimeout(()=>{$('messageSaved').textContent='';},1800);};
+$('personalMessage').textContent = window.RETURNLY_NOTE || 'A little reminder to stay on top of your returns. ♡';
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
 $('company').addEventListener('input',updateSuggestions);$('dispatchDate').addEventListener('change',updateSuggestions);
 $('returnForm').addEventListener('submit',e=>{e.preventDefault();const company=$('company').value.trim(),dispatchDate=$('dispatchDate').value,registerBy=$('registerBy').value,due=$('dueDate').value;if(!company||!dispatchDate||!registerBy||!due){alert('Please add a company, dispatch date and both deadlines.');return;}let known=retailerMatch(company);if(!known){retailers[company]={registrationDays:Math.max(0,daysLeft(registerBy)-daysLeft(dispatchDate)),returnDays:Math.max(1,daysLeft(due)-daysLeft(dispatchDate))};known=company;}returns.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),company:known,item:$('item').value.trim(),dispatchDate,registerBy,due,reminders:$('reminders').value,done:false,created:today()});save();$('returnDialog').close();render();});

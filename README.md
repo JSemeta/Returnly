@@ -3,7 +3,7 @@
 This is an updated copy of the original Returnly app. Keep your original ZIP as a backup; upload these files over the existing files in your GitHub repository to update the live app.
 
 ## What's new
-- Personal note on the home screen. Type a message and tap **Save note**; it stays on that device.
+- Personal note on the home screen is now read-only inside the app. Edit the separate `note.js` file on GitHub to change the wording for everyone using this website.
 - Add each return using the dispatch / delivery date as the starting point.
 - Two independent deadlines are calculated from that date: **register return code by** and **return parcel by**.
 - Each saved company has two editable timers in **Company settings**: registration days and return days.
@@ -43,3 +43,15 @@ Your return data and saved note stay in browser storage on your device. Replacin
 2. Create a public repository named `returnly` and upload all seven files to its root.
 3. Open **Settings → Pages**. Under Build and deployment, choose **Deploy from a branch**, branch `main`, folder `/(root)`, then Save.
 4. Open the published URL in Safari on your iPhone, tap Share → Add to Home Screen → Add.
+
+
+## Change the home-screen note (no coding experience needed)
+1. Open your Returnly repository on GitHub.
+2. Click the file named `note.js`.
+3. Click the pencil icon (Edit this file).
+4. Change only the words between the quotation marks on the `window.RETURNLY_NOTE` line.
+   Example: `window.RETURNLY_NOTE = "Remember to check your parcels every Friday. ♡";`
+5. Click **Commit changes**.
+6. Wait a few minutes for GitHub Pages to publish, then refresh Returnly.
+
+You do not need to edit `index.html`, `app.js`, or `styles.css` to change the note. The note is shared website text, not private per-device information. Anyone visiting the site sees the same note.
